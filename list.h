@@ -2,7 +2,7 @@
 // 
 // Interface definition for linked list.
 //
-// Kuira Edwards @02942519
+// <Author>
 
 #include <stdbool.h>
 
@@ -56,3 +56,4 @@ elem list_get_elem_at(list_t *l, int index);
 
 /* Returns the index at which the given element appears, or -1 if not found */
 int list_get_index_of(list_t *l, elem value);
+

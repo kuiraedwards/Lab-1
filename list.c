@@ -1,217 +1,192 @@
 // list/list.c
 //
 // Implementation for linked list.
+//  Worked with Jamarri White
 //
 // Kuira Edwards @02942519
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "list.h"
 
-node_t *node_alloc(int value) {
-  node_t *node = (node_t*) malloc(sizeof(node_t));
-  node->value = value;
-  node->next = NULL;
-  return node;
+list_t *list_alloc() {
+  list_t* list_new = (list_t*) malloc(sizeof(list_t));
+  list_new->head = NULL;
+  return list_new;
 }
 
-list_t *list_alloc() {
-  list_t* list = (list_t*) malloc(sizeof(list_t));
-  list->head = NULL;
-  return list;
+node_t *node_alloc(elem value) {
+  node_t* new_node = (node_t*)malloc(sizeof(node_t));
+  new_node->value = value;
+  new_node->next = NULL;
+  return new_node;
 }
-  
+
 void list_free(list_t *l) {
-  free(l);
+  node_t *curr = l->head;
+  if(curr == NULL) {
+    printf("This list is empty!")
+  }
+  while (curr != NULL) {
+    node_t *temp = curr->next;
+    free(curr);
+    curr = temp;
+  }
+}
+
+char* toString(list_t *l) {
+  char temp[250];
 }
 
 void node_free(node_t *n) {
-  free(n);
+  if (n->next != NULL) {
+    node_free(n->next);
+  }
+  else {
+    free(n);
+  }
 }
 
 void list_print(list_t *l) {
-  node_t* current = l->head;
-
-  if (current == NULL) {
-    printf("Empty list\n");
+  node_t *curr = l->head;
+  if (curr == NULL) {
+    printf("This list is empty!");
   }
-  else{
-    while (current != NULL) {
-      printf("%d", current->value);
-      current = current->next;
+  else {
+    while (curr != NULL) {
+      printf("The current node is %d \n", curr->value);
+      curr = curr->next;
     }
   }
 }
 
 int list_length(list_t *l) {
-  int count = 0;
-  node_t* current = l->head;
-  if (current == NULL) {
-    printf("Empty list\n");
+  int length = 0;
+  node_t *curr = l->head;
+  while (curr != NULL) {
+    length++;
+    curr = curr->next;
   }
-  while (current != NULL) {
-    count++;
-    current = current->next;
-  }
-  return count;
+  return length;
 }
+
 void list_add_to_back(list_t *l, elem value) {
-  node_t* current = l->head;
-  node_t* newNode = (node_t*) malloc(sizeof(node_t));
-  if (current == NULL) {
-    list_add_to_front(l, value);
+  node_t *new = node_alloc(value);
+  node_t *curr = l->head;
+  
+  if (curr == NULL) {
+    l->head = new;
+    return;
+  }
+  while (curr->next != NULL) {
+    curr = curr->next;
+  }
+  curr->next = new_node;
+}
+
+void list_add_to_front(list_t *l, elem value) {
+  node_t *new = node_alloc(value);
+  new->next = l->head;
+  l->head = new;
+}
+
+void list_add_at_index(list_t *l, elem value, int index) {
+  if ((index >= list_length(l)) || (index < 0)) {
+    return;
+  }
+  node_t *new = malloc(sizeof(node_t));
+  new->value = value;
+  node_t *curr = l->head;
+
+  int curr_index = 0;
+  for (curr_index = 0; curr_index < index-1; curr_index++) {
+    curr = curr->next;
+  }
+  if (curr == NULL) {
+    l->head = new;
   }
   else {
-    while(current->next != NULL) {
-      current = current->next;
-    }
-    current->next = newNode;
-    newNode->value = value;
-    newNode->next = NULL;
+    new->next = curr->next;
+    curr->next = new;
   }
 }
-  
-void list_add_to_front(list_t *l, elem value) {
-  node_t* newNode = node_alloc(value);
-  if (l->head == NULL) {
-    l->head = newNode;
-  }
-  else{
-    newNode->next = l->head;
-    l->head = newNode;
-  }
-}
-void list_add_at_index(list_t *l, elem value, int index){
-  node_t* current = l->head;
-  node_t* newNode = (node_t*) malloc(sizeof(node_t));
 
-  if(index == 0 || current == NULL) {
-    list_add_to_front(l,value);
-  }
-  else{
-    int count = 0;
-    for(count = 0; count < index - 1; count++) {
-      if(current->next == NULL) {
-        return;
-    }
-    current = current->next;
-  }
-  newNode->value = value;
-  newNode->next = current->next;
-  current->next = newNode;
-  }
-}
 elem list_remove_from_back(list_t *l) {
-  elem val;
-
-  if(list_length(l) == 0) {
-    return -1;
-  }
-  if(l->head->next == NULL) {
-    val = l->head->value;
-    node_free(l->head);
-    return val;
-  }
-
-  node_t* current = l->head;
-
-  while(current->next->next != NULL) {
-    current = current->next;
-  }
-  val = current->next->value;
-  node_free(current->next);
-  current->next = NULL;
-  return val;
-}
-elem list_remove_from_front(list_t *l) {
-  elem val;
-
-  if(list_length(l) == 0) {
-    return -1;
-  }
-
-  node_t* nextNode = l->head->next;
-  val = l->head->value;
-  node_free(l->head);
-  l->head = nextNode;
-
-  return val;
-}
-elem list_remove_at_index(list_t *l, int index) {
-  elem val;
-
-  if(list_length(l) == 0) {
-    return -1;
-  }
-
-  if(index == 0) {
-    return list_remove_from_front(l);
-  }
-
-  node_t* current = l->head;
-  node_t* other = NULL;
-
-  int i = 0;
-  for(i = 0; i < index - 1; i++) {
-    if(current->next = NULL) {
-      return -1;
+  node_t *curr = l->head;
+  node_t *remove = curr;
+  while ((curr != NULL) && (curr->next != NULL)) {
+    if (curr->next->next == NULL) {
+      remove = curr->next;
+      curr->next = NULL;
     }
-    current = current->next;
+    else {
+      curr = curr->next;
+    }
   }
+  return remove->value;
+}
 
-  other = current->next;
-  val = other->value;
-  current->next = other->next;
-  node_free(other);
+elem list_remove_from_front(list_t *l) {
+  if(!l) {
+    printf("This list is empty!");
+    return;
+  }
+  else {
+    int remove = l->head->value;
+    l->head = l->head->next;
+    return remove;
+  }
+}
 
-  return val;
+elem list_remove_at_index(list_t *l, int index) {
+  if ((index >= list_length(l)) || (index < 0)) {
+    return 0;
+  }
+  node_t *curr = l->head;
+  
+  int curr_index = 0;
+  for (curr_index = 0; curr_index < index-1; curr_index++) {
+    curr = curr->next;
+  }
+  int remove = curr->next->value;
+  curr->next = curr->next->next;
+  return remove;
 }
 
 bool list_is_in(list_t *l, elem value) {
-  node_t* current = l->head;
-  if(current == NULL) {
-    return false;
-  }
-  while(current != NULL) {
-    if(current->value == value) {
+  node_t *curr = l->head;
+  while(curr != NULL) {
+    if(curr->value == value) {
       return true;
     }
-    current = current->next;
+    curr = curr->next;
   }
   return false;
 }
 
 elem list_get_elem_at(list_t *l, int index) {
-  node_t* current = l->head;
-  if(current == NULL) {
-    return -1;
+  if ((index >= list_length(l)) || (index < 0)) {
+    return 0;
   }
-  int count = 0;
-  for(count = 0; count < index; count++) {
-    if(current->next == NULL) {
-      return -1;
-    }
-    current = current->next;
+  node_t *curr = l->head;
+
+  int curr_index = 0;
+  for (curr_index; curr_index < index; curr_index++) {
+    curr = curr->next;
   }
-  return current->value;
+  return curr->value;
 }
 
 int list_get_index_of(list_t *l, elem value) {
-  node_t* current = l->head;
-  elem length = list_length(l);
-  int count = 1;
-  if(current == NULL) {
-    return -1;
-  }
-  for(count = 1; count < length - 1; count++) {
-    if(current->next == NULL) {
-      return -1;
+  node_t* curr = l->head;
+  int index = 0
+
+  while (curr != NULL) {
+    if (curr->value == value) {
+      return index;
     }
     current = current->next;
-    if(current->value == value) {
-      return count;
-    }
+    index += 1;
   }
   return -1;
 }
